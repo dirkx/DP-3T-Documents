@@ -15,9 +15,9 @@ Simple implémentation of:
 
 ### Typical results
 
-Resulting file size: 8 - 40 Mbyte
+Resulting file size: 8 - 40 Mbyte (10-20% of the size of that many 256 bit hashes).
 
-Resulting scan times: < 0.1 second on an iPhone 5.
+Resulting scan times: < 0.3 second on an iPhone 5 for an naive implementation.
 
 This assumes that the false positives are kept lower than 1:1000 for actual individual match.
 
