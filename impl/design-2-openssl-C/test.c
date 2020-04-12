@@ -56,6 +56,8 @@ int main(int argc, char ** argv) {
 #define INFECTED         (6)    // invected people met
 #define FAKE_INFECTED   (10)    // list of invecsted peopel
 #endif
+    #define TOTAL_INFECTED  (FAKE_INFECTED+FAKE_INFECTED)
+
     printf("\ncreating infected patients\n");
     dp3t_eph_seed_t * invected_seeds = (dp3t_eph_seed_t*) malloc(sizeof(dp3t_eph_seed_t) * INFECTED);
     assert(invected_seeds);
@@ -91,10 +93,10 @@ int main(int argc, char ** argv) {
     //
     // Periodically (e.g., every 4 hours), the backend creates a new Cuckoo filter F and for each pair (t, seed ) uploaded by an infected patients it inserts
     //
-    size_t cfsize =(FAKE_INFECTED + INFECTED + 100) * 32;
-    
-    cuckoo_ctx_t * ctx = cuckoo_filter_init(cfsize);
+    cuckoo_ctx_t * ctx = cuckoo_filter_init(TOTAL_INFECTED);
     assert(ctx);
+    if (TOTAL_INFECTED  <100)
+        show_hash_slots(ctx);
     
     printf("\nBackend - server takes the list of recived seeds and puts them into a filter\n");
     {
@@ -125,7 +127,9 @@ int main(int argc, char ** argv) {
             
         }
     };
-    // show_hash_slots(ctx);
+    if (TOTAL_INFECTED  <100)
+        show_hash_slots(ctx);
+    
     size_t filelen = 0;
     assert(CUCKOO_OK == cuckoo_filter_serialize(ctx, NULL, &filelen));
     uint8_t * buff;
@@ -155,7 +159,9 @@ int main(int argc, char ** argv) {
     printf("Checking for contaminated patients on the phone\n");
     assert(ctx = cuckoo_filter_init_from_file(buff, filelen));
     
-    // show_hash_slots(ctx);
+    
+    if (TOTAL_INFECTED  <100)
+        show_hash_slots(ctx);
     
     // Now check if we can find the needles in this haystack
     int contaminated = 0;
@@ -171,7 +177,8 @@ int main(int argc, char ** argv) {
                 printf("ERROR !");
         }
     };
-    printf("Got %d (false positives %d) contaminated out of %d in my list and %d in the filter\n",contaminated, contaminated-INFECTED, N_MET, INFECTED + FAKE_INFECTED);
+    printf("Expected %d contaminated - CF load %.1f%% - resulting file %.1f%% of just listing the hashes.\n",INFECTED,cf_loading(ctx), 100. * filelen / TOTAL_INFECTED / EPHID_HASHLEN);
+    printf("Got %d (false positives-ish %d) contaminated out of %d in my list and %d in the filter\n",contaminated, contaminated-INFECTED, N_MET, INFECTED + FAKE_INFECTED);
     // assert(contaminated == INFECTED);
     cuckoo_free(ctx);
 }

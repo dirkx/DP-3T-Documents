@@ -1,4 +1,4 @@
-SOURCES := test.c libdp3t_v2.c cuckoofilter-utopiaprince/cuckoo_filter.c
+SOURCES := test.c libdp3t_v2.c cuckoo_filter.c
 OBJS := ./test.o ./cuckoo_filter.o ./libdp3t_v2.o
 LIBS := -lcrypto
 
@@ -9,6 +9,7 @@ test: $(OBJS)
 
 clean:
 	rm $(OBJS)
+
 .c.o:
 	$(CC) -Icuckoofilter-utopiaprince $(CFLAGS) $(INCLUDES) -c $<
 
